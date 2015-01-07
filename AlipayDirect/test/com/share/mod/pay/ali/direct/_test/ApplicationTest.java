@@ -15,6 +15,7 @@ public class ApplicationTest {
 		Properties properties = new Properties();
 		properties.load(new FileInputStream(new File("D:/pay/alipaydirect.properties")));
 		AlipayDirectHandler alipayWAPHandler = AlipayDirectHandler.getInstance(properties);
+		System.out.println("nihao22");
 		
 	}
 }

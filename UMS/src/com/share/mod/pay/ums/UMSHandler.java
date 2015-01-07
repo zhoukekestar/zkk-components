@@ -138,14 +138,11 @@ public class UMSHandler {
 			String formDesc = request.getParameter(FORM_DESC);
 
 			if (formMoney == null || formDesc == null || formDesc.trim().length() == 0) {
-				iCreate.handleNullException();
+				throw new InvalidParameterException("One of Params[" + FORM_MONEY + "," + FORM_DESC + "] is null.");
 			}
-			try {
-				@SuppressWarnings("unused")
-				Integer temp = new Integer(formMoney);
-			} catch (NumberFormatException e) {
-				iCreate.handleMoneyException();
-			}
+			@SuppressWarnings("unused")
+			Integer temp = new Integer(formMoney);
+			
 
 			// 工具类
 			DefaultSecurityService ss = UMSUtils.getDafaultService();
@@ -155,7 +152,7 @@ public class UMSHandler {
 			OrderEntity respOrder = new OrderEntity();
 
 			String curreTime = UMSUtils.getCurrentTime();
-			String merOrderId = iCreate.createMerOrderId();
+			String merOrderId = iCreate.createMerOrderId(request);
 			// 构建订单
 			order.setMerId(merId); 							// 商户号
 			order.setMerTermId(merTermId); 					// 终端号
@@ -185,10 +182,14 @@ public class UMSHandler {
 			response.setContentType("text/html; charset=UTF-8");
 			response.getWriter().write(buildRequest("https://mpos.quanminfu.com:8018/umsFrontWebQmjf/umspay", params));
 
-			iCreate.saveForQuery(respOrder.getTransId(), respOrder.getMerOrderId(), curreTime.substring(0, 8));
+			iCreate.log(respOrder.getTransId(), respOrder.getMerOrderId(), curreTime.substring(0, 8));
 			
-		} catch (PayException e) {		
-			iCreate.handlePayException(e);
+		}catch(InvalidParameterException e){
+			iCreate.handleNullException(request, response, e);
+		}catch(NumberFormatException e){
+			iCreate.handleMoneyException(request, response, e);
+		}catch (PayException e) {		
+			iCreate.handlePayException(request, response, e);
 		}
 	}
 	
@@ -221,7 +222,7 @@ public class UMSHandler {
 			NoticeEntity noticeEntity = service.parseNoticeEntity(req);
 			NoticeEntity respEntity = new NoticeEntity();
 			
-			iNotify.save(req, noticeEntity);
+			iNotify.log(req, noticeEntity);
 			
 			respEntity.setMerOrderState("00");
 			
@@ -248,7 +249,7 @@ public class UMSHandler {
 
 			if (transid == null || merOrderid == null || orderDate == null)
 			{
-				iQuery.handleNullException();
+				throw new InvalidParameterException("One of params[" + FORM_QUERY_TRANSID + "," + FORM_QUERY_MERORDERID + "," + FORM_QUERY_ORDERDATE + "] is null.");
 			}
 			UMSPayServiceImpl service = UMSUtils.getUMSService();
 
@@ -265,8 +266,10 @@ public class UMSHandler {
 			
 			iQuery.doService(req, resp, respOrder);
 			
-		} catch (PayException e) {
-			iQuery.handlePayException(e);
+		}catch(InvalidParameterException e){
+			iQuery.handleNullException(req, resp, e);
+		}catch (PayException e) {
+			iQuery.handlePayException(req, resp, e);
 		}
 
 	}

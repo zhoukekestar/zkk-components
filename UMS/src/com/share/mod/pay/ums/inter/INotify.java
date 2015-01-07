@@ -17,7 +17,7 @@ public interface INotify {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public void save(HttpServletRequest request, NoticeEntity noticeEntity)	throws ServletException, IOException;
+	public void log(HttpServletRequest request, NoticeEntity noticeEntity)	throws ServletException, IOException;
 	
 	
 	/***

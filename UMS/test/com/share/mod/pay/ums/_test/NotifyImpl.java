@@ -24,7 +24,7 @@ public class NotifyImpl implements INotify {
 	}
 
 	@Override
-	public void save(HttpServletRequest request, NoticeEntity noticeEntity) throws ServletException, IOException {
+	public void log(HttpServletRequest request, NoticeEntity noticeEntity) throws ServletException, IOException {
 		logger.debug(JSON.toJSONString(noticeEntity));
 	}
 }

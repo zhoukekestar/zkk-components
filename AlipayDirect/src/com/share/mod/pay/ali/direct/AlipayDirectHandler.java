@@ -115,7 +115,7 @@ public class AlipayDirectHandler {
 			//必填		
 			
 			//商户订单号
-			String out_trade_no = iCreate.createOutTradeNo();
+			String out_trade_no = iCreate.createOutTradeNo(request);
 			//商户网站订单系统中唯一订单号，必填		
 			
 			// 订单名称
@@ -145,7 +145,7 @@ public class AlipayDirectHandler {
 			
 			if(subject == null || body == null || show_url == null)
 			{
-				throw new InvalidParameterException(" Param[" + FORM_SUBJECT + "," + FORM_BODY + "," + FORM_SHOW_URL + "] null");
+				throw new InvalidParameterException("One of Params [" + FORM_SUBJECT + "," + FORM_BODY + "," + FORM_SHOW_URL + "] is null");
 			}
 			
 			//////////////////////////////////////////////////////////////////////////////////
@@ -172,11 +172,16 @@ public class AlipayDirectHandler {
 			response.setContentType("text/html; charset=UTF-8");
 			response.getWriter().println(sHtmlText);
 			
+			iCreate.log(request, sParaTemp, sHtmlText);
+			
 		}catch (NumberFormatException e){
 			
 			iCreate.handleNumberFormatException(request, response);
 			
-		}catch (Exception e) {
+		}catch (InvalidParameterException e) {
+			iCreate.handleInvalidParameterException(request, response, e);
+		}
+		catch (Exception e) {
 			
 			iCreate.handleException(request, response, e);
 		}

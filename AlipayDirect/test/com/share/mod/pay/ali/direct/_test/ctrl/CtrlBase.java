@@ -1,5 +1,6 @@
 package com.share.mod.pay.ali.direct._test.ctrl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -20,9 +21,7 @@ public class CtrlBase extends HttpServlet {
 	{
 		Properties properties = new Properties();
 		try {
-			String path = "D:/pay/alipaydirect.properties";//CtrlBase.class.getClassLoader().getResource("").toURI().getPath();
-			//path += "com/share/mod/pay/ali/direct/_test/alipaydirect.properties";
-			properties.load(new FileInputStream(path));
+			properties.load(new FileInputStream(new File("D:/pay/alipaydirect.properties")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}catch (Exception e) {
