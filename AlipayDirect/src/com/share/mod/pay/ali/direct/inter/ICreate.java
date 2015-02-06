@@ -17,7 +17,7 @@ public interface ICreate {
 	/***
 	 * 处理金额异常，无法转换成整数值
 	 */
-	public void handleNumberFormatException(HttpServletRequest request, HttpServletResponse response)  throws ServletException, IOException;
+	public void handleNumberFormatException(HttpServletRequest request, HttpServletResponse response, NumberFormatException e)  throws ServletException, IOException;
 	
 	/***
 	 * 处理参数异常，当body、subject、show_url其中一个为null时

@@ -149,7 +149,7 @@ public class AlipayWAPHandler {
 			// 必填
 
 			// 商户订单号
-			String out_trade_no = iCreate.createOutTradeNo();
+			String out_trade_no = iCreate.createOutTradeNo(request);
 			// 商户网站订单系统中唯一订单号，必填
 
 			// 订单名称
@@ -223,11 +223,11 @@ public class AlipayWAPHandler {
 						"<body></body></html>";	
 			response.getWriter().print(sHtmlText);
 			
-			iCreate.save(request);
+			iCreate.log(request);
 			
 		} catch (NumberFormatException e){
 			
-			iCreate.handleNumberFormatException(request, response);
+			iCreate.handleNumberFormatException(request, response, e);
 			
 		}catch (Exception e) {
 			

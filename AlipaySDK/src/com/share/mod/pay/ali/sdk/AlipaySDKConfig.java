@@ -1,5 +1,6 @@
 package com.share.mod.pay.ali.sdk;
 
+import com.share.mod.pay.ali.sdk.inter.ICreate;
 import com.share.mod.pay.ali.sdk.inter.INotify;
 
 
@@ -34,10 +35,17 @@ public class AlipaySDKConfig {
 	
 	// 支付宝的公钥，无需修改该值
 	public static String ali_public_key  = "";
+	
+	// 卖家支付宝
+	public static String email = "";
+	
+	// 通知地址
+	public static String URL_NOTIFY = "";
 
 	//↑↑↑↑↑↑↑↑↑↑请在这里配置您的基本信息↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 	
 	public static INotify iNotify;
+	public static ICreate iCreate;
 	
 	
 	// 调试用，创建TXT日志文件夹路径

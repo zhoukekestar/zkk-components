@@ -26,7 +26,7 @@ public class CreateImpl implements ICreate {
 	}
 	@Override
 	public void handleNumberFormatException(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+			HttpServletResponse response,NumberFormatException e) throws ServletException, IOException {
 		
 		response.setContentType("text/html; charset=utf-8");
 		response.getWriter().print("{\"msg\":\"金额转换错误,单位为分\"}");

@@ -11,7 +11,7 @@ public interface ICreate {
 	 *  创建商户订单号
 	 * @return
 	 */
-	public String createOutTradeNo();
+	public String createOutTradeNo(HttpServletRequest request);
 	
 	/***
 	 * 处理金额异常
@@ -20,7 +20,7 @@ public interface ICreate {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public void handleNumberFormatException(HttpServletRequest request, HttpServletResponse response)  throws ServletException, IOException;
+	public void handleNumberFormatException(HttpServletRequest request, HttpServletResponse response, NumberFormatException e)  throws ServletException, IOException;
 	
 	/***
 	 * 处理异常
@@ -38,5 +38,5 @@ public interface ICreate {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public void save(HttpServletRequest request)  throws ServletException, IOException;
+	public void log(HttpServletRequest request)  throws ServletException, IOException;
 }

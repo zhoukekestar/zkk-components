@@ -176,8 +176,7 @@ public class AlipayDirectHandler {
 			
 		}catch (NumberFormatException e){
 			
-			iCreate.handleNumberFormatException(request, response);
-			
+			iCreate.handleNumberFormatException(request, response, e);
 		}catch (InvalidParameterException e) {
 			iCreate.handleInvalidParameterException(request, response, e);
 		}

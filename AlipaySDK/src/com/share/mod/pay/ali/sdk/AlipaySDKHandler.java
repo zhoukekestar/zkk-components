@@ -1,6 +1,8 @@
 package com.share.mod.pay.ali.sdk;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,6 +13,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.share.mod.pad.ali.sdk.android.SignUtils;
+import com.share.mod.pay.ali.sdk.inter.ICreate;
 import com.share.mod.pay.ali.sdk.inter.INotify;
 import com.share.mod.pay.ali.sdk.util.AlipayNotify;
 
@@ -20,7 +24,10 @@ import com.share.mod.pay.ali.sdk.util.AlipayNotify;
  * <li>partner 合作身份者ID，以2088开头由16位纯数字组成的字符串</li>
  * <li>private_key 商户的私钥</li>
  * <li>ali_public_key 支付宝的公钥，无需修改该值</li>
+ * <li>email 卖家支付宝账号</li>
+ * <li>url_notify 支付宝支付通知接口</li>
  * <li>notify iNotify的实现类包全名</li>
+ * <li>create iCreate的实现类包全名</li>
  * </ul>
  * 
  * <ul>
@@ -31,7 +38,9 @@ import com.share.mod.pay.ali.sdk.util.AlipayNotify;
  */
 public class AlipaySDKHandler {
 	
-	private static String[] paramList = {"partner","private_key","ali_public_key","notify"};
+	private static String[] paramList = {
+		"partner","private_key","ali_public_key","email", "url_notify", //4
+		"notify","create"}; // 6
 	
 	private static AlipaySDKHandler alipaySDKHandler;
 	public static AlipaySDKHandler getInstance(Properties properties)
@@ -50,10 +59,13 @@ public class AlipaySDKHandler {
 		AlipaySDKConfig.partner 		= properties.getProperty(paramList[0]);
 		AlipaySDKConfig.private_key 	= properties.getProperty(paramList[1]);
 		AlipaySDKConfig.ali_public_key 	= properties.getProperty(paramList[2]);
+		AlipaySDKConfig.email			= properties.getProperty(paramList[3]);
+		AlipaySDKConfig.URL_NOTIFY		= properties.getProperty(paramList[4]);
 		try {			
-			AlipaySDKConfig.iNotify 		= (INotify)Class.forName(properties.getProperty(paramList[3])).newInstance();
+			AlipaySDKConfig.iNotify 		= (INotify)Class.forName(properties.getProperty(paramList[5])).newInstance();
+			AlipaySDKConfig.iCreate			= (ICreate)Class.forName(properties.getProperty(paramList[6])).newInstance();
 		} catch (Exception e) {
-			throw new InvalidParameterException("SDK params error:" + properties.getProperty(paramList[3]) + " not found.");
+			throw new InvalidParameterException("SDK params error:" + properties.getProperty(paramList[5]) + " OR " + properties.getProperty(paramList[6]) +  " not found.");
 		}
 		AlipaySDKConfig.log_path		= properties.getProperty("log_path", "./");
 	}
@@ -129,5 +141,77 @@ public class AlipaySDKHandler {
 			AlipaySDKConfig.iNotify.fail(request, out_trade_no, trade_no);
 			response.getWriter().println("fail");
 		}
+	}
+	
+	/**
+	 * create the order info. 创建订单信息
+	 * @throws UnsupportedEncodingException 
+	 * 
+	 */
+	private String getOrderInfo(HttpServletRequest request, String subject, String body, String price) throws UnsupportedEncodingException {
+		// 合作者身份ID
+		String orderInfo = "partner=" + "\"" + AlipaySDKConfig.partner + "\"";
+
+		// 卖家支付宝账号
+		orderInfo += "&seller_id=" + "\"" + AlipaySDKConfig.email + "\"";
+
+		// 商户网站唯一订单号
+		orderInfo += "&out_trade_no=" + "\"" + AlipaySDKConfig.iCreate.createOutTradeNo(request)+ "\"";
+
+		// 商品名称
+		orderInfo += "&subject=" + "\"" + subject + "\"";
+
+		// 商品详情
+		orderInfo += "&body=" + "\"" + body + "\"";
+
+		// 商品金额
+		orderInfo += "&total_fee=" + "\"" + price + "\"";
+
+		// 服务器异步通知页面路径
+		orderInfo += "&notify_url=" + "\"" + URLEncoder.encode(AlipaySDKConfig.URL_NOTIFY, "UTF-8") + "\"";
+
+		// 接口名称， 固定值
+		orderInfo += "&service=\"mobile.securitypay.pay\"";
+
+		// 支付类型， 固定值
+		orderInfo += "&payment_type=\"1\"";
+
+		// 参数编码， 固定值
+		orderInfo += "&_input_charset=\"utf-8\"";
+
+		// 设置未付款交易的超时时间
+		// 默认30分钟，一旦超时，该笔交易就会自动被关闭。
+		// 取值范围：1m～15d。
+		// m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
+		// 该参数数值不接受小数点，如1.5h，可转换为90m。
+		orderInfo += "&it_b_pay=\"30m\"";
+
+		// 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
+		orderInfo += "&return_url=\"m.alipay.com\"";
+
+		// 调用银行卡支付，需配置此参数，参与签名， 固定值
+		// orderInfo += "&paymethod=\"expressGateway\"";
+
+		return orderInfo;
+	}
+	
+	public String getOrderString(HttpServletRequest request, String subject, String body, String price) throws UnsupportedEncodingException
+	{
+		String orderInfo = getOrderInfo(request, subject, body, price);
+		String sign = SignUtils.sign(orderInfo, AlipaySDKConfig.private_key);
+		try {
+			// 仅需对sign 做URL编码
+			sign = URLEncoder.encode(sign, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		final String payInfo = orderInfo + "&sign=\"" + sign + "\"&"
+				+ getSignType();
+
+		return payInfo;
+	}
+	
+	public String getSignType() {
+		return "sign_type=\"RSA\"";
 	}
 }

@@ -1,0 +1,5 @@
+com.share.mod.pay.ali.sdk
+com.share.mod.pay.ali.sdk.inter
+com.share.mod.pay.ali.sdk.sign
+com.share.mod.pay.ali.sdk.util
+com.share.mod.pay.ali.sdk.util.httpClient
